@@ -98,3 +98,76 @@ console.assert(closestIntersection("R8,U5,L5,D3", "U7,R6,D4,L4") === 6);
 console.assert(closestIntersection("R75,D30,R83,U83,L12,D49,R71,U7,L72", "U62,R66,U55,R34,D71,R55,D58,R83") === 159);
 console.assert(closestIntersection("R98,U47,R26,D63,R33,U87,L62,D20,R33,U53,R51", "U98,R91,D20,R16,D67,R40,U7,R15,U6,R7") === 135);
 console.log(closestIntersection(...day03input));
+
+/*
+--- Part Two ---
+It turns out that this circuit is very timing-sensitive; you actually need to minimize the signal delay.
+
+To do this, calculate the number of steps each wire takes to reach each intersection; choose the intersection where the sum of both wires' steps is lowest. If a wire visits a position on the grid multiple times, use the steps value from the first time it visits that position when calculating the total value of a specific intersection.
+
+The number of steps a wire takes is the total number of grid squares the wire has entered to get to that location, including the intersection being considered. Again consider the example from above:
+
+...........
+.+-----+...
+.|.....|...
+.|..+--X-+.
+.|..|..|.|.
+.|.-X--+.|.
+.|..|....|.
+.|.......|.
+.o-------+.
+...........
+In the above example, the intersection closest to the central port is reached after 8+5+5+2 = 20 steps by the first wire and 7+6+4+3 = 20 steps by the second wire for a total of 20+20 = 40 steps.
+
+However, the top-right intersection is better: the first wire takes only 8+5+2 = 15 and the second wire takes only 7+6+2 = 15, a total of 15+15 = 30 steps.
+
+Here are the best steps for the extra examples from above:
+
+R75,D30,R83,U83,L12,D49,R71,U7,L72
+U62,R66,U55,R34,D71,R55,D58,R83 = 610 steps
+R98,U47,R26,D63,R33,U87,L62,D20,R33,U53,R51
+U98,R91,D20,R16,D67,R40,U7,R15,U6,R7 = 410 steps
+What is the fewest combined steps the wires must take to reach an intersection?
+
+*/
+function pointSteps(path) {
+  var result = new Map();
+  var x = 0;
+  var y = 0;
+  var count = 0;
+  var directions = path.split(',');
+  for (var direction of directions) {
+    var dir = direction[0];    
+    for (var distance = Number.parseInt(direction.slice(1)); distance-->0; ) {
+      switch (dir) {
+        case 'U': y--; break;
+        case 'D': y++; break;
+        case 'L': x--; break;
+        case 'R': x++; break;
+      }
+      var key = [x, y].join();
+      count++;
+      if (!result.has(key)) {
+        // only set the lowest step count
+        result.set(key, count);
+      }
+    }
+  }
+  return result;
+}
+function quickestIntersection(pathA, pathB) {
+  var pointStepsA = pointSteps(pathA);
+  var pointStepsB = pointSteps(pathB);
+  var intersectingPoints = intersection(new Set(pointStepsA.keys()), pointStepsB.keys());
+  if (intersectingPoints.size < 1) {
+    return "error, no intersection";
+  }
+  return [...intersectingPoints].reduce(function (prev, curr) {
+    var curSteps = pointStepsA.get(curr) + pointStepsB.get(curr);
+    return Math.min(prev, curSteps);
+  }, Number.MAX_VALUE);
+}
+console.assert(quickestIntersection("R8,U5,L5,D3", "U7,R6,D4,L4") === 30);
+console.assert(quickestIntersection("R75,D30,R83,U83,L12,D49,R71,U7,L72", "U62,R66,U55,R34,D71,R55,D58,R83") === 610);
+console.assert(quickestIntersection("R98,U47,R26,D63,R33,U87,L62,D20,R33,U53,R51", "U98,R91,D20,R16,D67,R40,U7,R15,U6,R7") === 410);
+console.log(quickestIntersection(...day03input));
