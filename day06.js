@@ -2708,3 +2708,102 @@ var day06input = [
 '72K)6BF',
 ];
 console.log(countOrbits(orbitalMap(day06input)));
+
+/*
+--- Part Two ---
+Now, you just need to figure out how many orbital transfers you (YOU) need to take to get to Santa (SAN).
+
+You start at the object YOU are orbiting; your destination is the object SAN is orbiting. An orbital transfer lets you move from any object to an object orbiting or orbited by that object.
+
+For example, suppose you have the following map:
+
+COM)B
+B)C
+C)D
+D)E
+E)F
+B)G
+G)H
+D)I
+E)J
+J)K
+K)L
+K)YOU
+I)SAN
+Visually, the above map of orbits looks like this:
+
+                          YOU
+                         /
+        G - H       J - K - L
+       /           /
+COM - B - C - D - E - F
+               \
+                I - SAN
+In this example, YOU are in orbit around K, and SAN is in orbit around I. To move from K to I, a minimum of 4 orbital transfers are required:
+
+K to J
+J to E
+E to D
+D to I
+Afterward, the map of orbits looks like this:
+
+        G - H       J - K - L
+       /           /
+COM - B - C - D - E - F
+               \
+                I - SAN
+                 \
+                  YOU
+What is the minimum number of orbital transfers required to move from the object YOU are orbiting to the object SAN is orbiting? (Between the objects they are orbiting - not between YOU and SAN.)
+*/
+
+function orbitalMap2(input) {
+  let result = new Map();
+  for (let line of input) {
+    let [left, right] = line.split(')', 2);
+    result.set(right, left);
+  }
+  return result;
+}
+
+function path(om2, target) {
+  let result = [];
+  let node = target;
+  while (om2.has(node)) {
+    node = om2.get(node);
+    result.unshift(node);
+  }
+  return result;
+}
+
+function distance(path1, path2) {
+  while (path1[0] === path2[0]) {
+    path1.shift();
+    path2.shift();
+  }
+  // console.log(path1 + '\t' + path2);
+  return path1.length + path2.length;
+}
+
+var example2 = [
+'COM)B',
+'B)C',
+'C)D',
+'D)E',
+'E)F',
+'B)G',
+'G)H',
+'D)I',
+'E)J',
+'J)K',
+'K)L',
+'K)YOU',
+'I)SAN',
+];
+
+var om2 = orbitalMap2(example2);
+console.assert(path(om2, 'YOU').join('') === 'COMBCDEJK');
+console.assert(distance(path(om2, 'YOU'), path(om2, 'SAN')) === 4);
+
+var om2day06input = orbitalMap2(day06input);
+console.log(distance(path(om2day06input, 'YOU'), path(om2day06input, 'SAN')));
